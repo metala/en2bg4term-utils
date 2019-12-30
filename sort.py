@@ -48,6 +48,10 @@ def list_section_tables(lines):
         yield (section, tb_start, tb_end)
 
 
+def table_row_first_cell(row):
+    return row.split('|')[0]
+
+
 def main():
     parser = argparse.ArgumentParser(
             description='Sorts and verifies en2bg4term tables')
@@ -62,7 +66,7 @@ def main():
     is_sorted = True
     for s, start, end in list_section_tables(lines):
         section_lines = lines[start:end]
-        sorted_lines = sorted(section_lines)
+        sorted_lines = sorted(section_lines, key=table_row_first_cell)
         if section_lines == sorted_lines:
             continue
         if args.fix:
