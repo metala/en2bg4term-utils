@@ -9,6 +9,9 @@ from string import ascii_uppercase
 
 non_empty_line_re = re.compile(r'.+\n')
 empty_line_re = re.compile(r'\s*\n')
+word_extractor_re = re.compile(r'(\(?(an|a|to|on)\)?\s+)?(.+?)')
+nonalphahyphen_re = re.compile(r'[^a-z-]')
+ws_re = re.compile(r'\s+')
 sections = ['1-9'] + list(ascii_uppercase)
 
 
@@ -49,14 +52,21 @@ def list_section_tables(lines):
 
 
 def table_row_first_cell(row):
-    return row.split('|')[0]
+    phrase = row.split('|')[0].strip()
+    m = word_extractor_re.fullmatch(phrase)
+    if m is None:
+        return ''
+
+    key = m.group(3)
+    key = key.replace(' ', '-')
+    key = ws_re.sub('-', key)
+    key = nonalphahyphen_re.sub('', key)
+    return key
 
 
 def main():
-    parser = argparse.ArgumentParser(
-            description='Sorts and verifies en2bg4term tables')
-    parser.add_argument('-f', '--filename', default='readme.md',
-                        help='The filename to process.')
+    parser = argparse.ArgumentParser(description='Sorts and verifies en2bg4term tables')
+    parser.add_argument('filename', default='readme.md', help='The filename to process.')
     parser.add_argument('--fix', action='store_true',
                         help='Fix and save file.')
 
